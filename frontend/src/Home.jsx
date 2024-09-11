@@ -33,10 +33,7 @@ function Home(props) {
 
   useEffect(() => {
     refresh();
-    setInterval(() => {
-      refresh();
-    }, 2000);
-  }, []);
+  }, [props.event]);
 
   return (
     <>
@@ -46,7 +43,7 @@ function Home(props) {
       <Divider sx={{ margin: '10px 0' }} />
       {props.admin ? <p>You are logged in as an Administrator so can create and edit flights.</p> : <></>}
 
-      {props.admin ? <NewFlight refresh={refresh} /> : <></>}
+      {props.admin ? <NewFlight /> : <></>}
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>

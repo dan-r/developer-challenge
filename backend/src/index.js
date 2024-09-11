@@ -4,7 +4,13 @@ import express from "express";
 import airline from "../../solidity/artifacts/contracts/Airline.sol/Airline.json";
 import config from "../config.json";
 
+import { createServer } from "http";
+import { Server } from "socket.io";
+
 const app = express();
+const server = createServer(app);
+const io = new Server(server);
+
 const firefly = new FireFly({
   host: config.HOST,
   namespace: config.NAMESPACE,
@@ -161,23 +167,41 @@ async function init() {
       }
     });
 
-  // await firefly
-  //   .createContractAPIListener(alApiName, "Changed", {
-  //     topic: "changed",
-  //   })
-  //   .catch((e) => {
-  //     const err = JSON.parse(JSON.stringify(e.originalError));
+  await firefly
+    .createContractAPIListener(alApiName, "FlightChanged", {
+      topic: "changed",
+    })
+    .catch((e) => {
+      const err = JSON.parse(JSON.stringify(e.originalError));
 
-  //     if (err.status === 409) {
-  //       console.log(
-  //         "Airline 'changed' event listener already exists in FireFly. Ignoring."
-  //       );
-  //     } else {
-  //       console.log(
-  //         `Error creating listener for Airline "changed" event: ${err.message}`
-  //       );
-  //     }
-  //   });
+      if (err.status === 409) {
+        console.log(
+          "Flight 'changed' event listener already exists in FireFly. Ignoring."
+        );
+      } else {
+        console.log(
+          `Error creating listener for flight "changed" event: ${err.message}`
+        );
+      }
+    });
+
+  await firefly
+    .createContractAPIListener(alApiName, "FlightAdded", {
+      topic: "added",
+    })
+    .catch((e) => {
+      const err = JSON.parse(JSON.stringify(e.originalError));
+
+      if (err.status === 409) {
+        console.log(
+          "Flight 'added' event listener already exists in FireFly. Ignoring."
+        );
+      } else {
+        console.log(
+          `Error creating listener for flight "added" event: ${err.message}`
+        );
+      }
+    });
 
   firefly.listen(
     {
@@ -193,14 +217,23 @@ async function init() {
           2
         )}`
       );
+      io.emit("blockchainEvent", { "name": event.blockchainEvent.name, "data": event.blockchainEvent.output });
     }
   );
 
   // Start listening
-  app.listen(config.PORT, () =>
+  server.listen(config.PORT, () =>
     console.log(`Kaleido DApp backend listening on port ${config.PORT}!`)
   );
 }
+
+io.on("connection", (socket) => {
+  console.log("WS: Connect");
+
+  socket.on("disconnect", () => {
+    console.log("WS: Disconnect");
+  });
+});
 
 init().catch((err) => {
   console.error(err.stack);

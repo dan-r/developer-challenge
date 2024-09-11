@@ -17,6 +17,12 @@ export default defineConfig(() => {
           secure: false,
           ws: true,
         },
+        "/socket.io": {
+          target: `http://localhost:4001/socket.io`,
+          changeOrigin: true,
+          secure: false,
+          ws: true,
+        }
       },
     },
   };

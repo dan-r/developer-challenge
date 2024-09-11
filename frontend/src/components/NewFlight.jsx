@@ -83,8 +83,6 @@ const NewFlight = (props) => {
 
             setExpanded(false);
             setSuccess(true);
-
-            props.refresh();
         } catch (error) {
             console.error('API Error:', error);
             alert('There was an error submitting the form.');
