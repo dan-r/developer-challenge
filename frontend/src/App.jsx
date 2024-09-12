@@ -24,7 +24,8 @@ function App(props) {
     open: false
   });
 
-  const [event, setEvent] = useState({});
+  const [flightEvent, setFlightEvent] = useState({});
+  const [seatEvent, setSeatEvent] = useState({});
   const [admin, setAdmin] = useState(false);
 
   function adminEnable() {
@@ -43,12 +44,16 @@ function App(props) {
 
     socket.on("blockchainEvent", (data) => {
       console.log("Received blockchain event:", data);
-      setEvent(data);
       if (data.name === "FlightChanged") {
         setAlert({ open: true, message: `Flight ${data.data.flightNumber} changed` });
+        setFlightEvent(data);
       }
       else if (data.name === "FlightAdded") {
         setAlert({ open: true, message: `Flight ${data.data.flightNumber} added` })
+        setFlightEvent(data);
+      } else if (data.name === "SeatChanged") {
+        setAlert({ open: true, message: `Seat booking changed for ${data.data.flightNumber}` })
+        setSeatEvent(data);
       }
     });
 
@@ -84,8 +89,8 @@ function App(props) {
         </Box>
         <Container maxWidth="lg">
           <Routes>
-            <Route path="/" element={<Home admin={admin} event={event} />} />
-            <Route path="/flight/:id" element={<Flight admin={admin} />} />
+            <Route path="/" element={<Home admin={admin} flightEvent={flightEvent} />} />
+            <Route path="/flight/:id" element={<Flight admin={admin} flightEvent={flightEvent} seatEvent={seatEvent} />} />
           </Routes>
         </Container>
       </BrowserRouter>

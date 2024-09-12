@@ -55,6 +55,62 @@ app.get("/api/flight/:id", async (req, res) => {
   );
 });
 
+// Get seat availability
+app.get("/api/flight/:id/seats", async (req, res) => {
+  res.send(
+    await firefly.queryContractAPI(alApiName, "getSeatAvailability", {
+      input: {
+        flightId: req.params.id
+      },
+      key: config.SIGNING_KEY,
+    })
+  );
+});
+
+// Book a seat
+app.post("/api/flight/:id/seats", async (req, res) => {
+  try {
+    const fireflyRes = await firefly.invokeContractAPI(alApiName, "bookSeat", {
+      input: {
+        flightId: req.params.id,
+        row: req.body.row,
+        column: req.body.column,
+        passengerName: req.body.passengerName
+      },
+      key: config.SIGNING_KEY,
+    });
+    res.status(202).send({
+      id: fireflyRes.id,
+    });
+  } catch (e) {
+    res.status(500).send({
+      error: e.message,
+    });
+  }
+});
+
+// Cancel a seat
+app.delete("/api/flight/:id/seats", async (req, res) => {
+  try {
+    const fireflyRes = await firefly.invokeContractAPI(alApiName, "cancelSeat", {
+      input: {
+        flightId: req.params.id,
+        row: req.body.row,
+        column: req.body.column,
+        passengerName: req.body.passengerName
+      },
+      key: config.SIGNING_KEY,
+    });
+    res.status(202).send({
+      id: fireflyRes.id,
+    });
+  } catch (e) {
+    res.status(500).send({
+      error: e.message,
+    });
+  }
+});
+
 // Create a flight
 app.post("/api/flight", async (req, res) => {
   try {
@@ -199,6 +255,24 @@ async function init() {
       } else {
         console.log(
           `Error creating listener for flight "added" event: ${err.message}`
+        );
+      }
+    });
+
+  await firefly
+    .createContractAPIListener(alApiName, "SeatChanged", {
+      topic: "changed",
+    })
+    .catch((e) => {
+      const err = JSON.parse(JSON.stringify(e.originalError));
+
+      if (err.status === 409) {
+        console.log(
+          "Seat 'changed' event listener already exists in FireFly. Ignoring."
+        );
+      } else {
+        console.log(
+          `Error creating listener for seat "changed" event: ${err.message}`
         );
       }
     });

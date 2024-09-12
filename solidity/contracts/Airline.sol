@@ -10,6 +10,10 @@ contract Airline {
         uint256 departureTime; // Unix timestamp
         uint256 arrivalTime; // Unix timestamp
         string planeType;
+        address owner;
+        mapping(uint256 => mapping(uint256 => string)) seatBookings; // Row > Column > Name
+        uint256 rows;
+        uint256 columns;
     }
 
     enum FlightStatus {
@@ -31,6 +35,14 @@ contract Airline {
     // Counter for generating unique flight IDs
     uint256 private flightIdCounter;
 
+    // Aircraft seat configs
+    struct PlaneTypeConfig {
+        uint256 rows;
+        uint256 columns;
+    }
+
+    mapping(string => PlaneTypeConfig) private planeTypeConfigs;
+
     // Event that is emitted when a flight is added
     event FlightAdded(
         uint256 flightId,
@@ -44,6 +56,24 @@ contract Airline {
         string origin,
         string destination
     );
+    event SeatChanged(
+        uint256 flightId,
+        string flightNumber,
+        uint256 row,
+        uint256 column,
+        string passengerName
+    );
+
+    constructor() {
+        planeTypeConfigs["B738"] = PlaneTypeConfig({rows: 30, columns: 6}); // Boeing 737-800
+        planeTypeConfigs["B772"] = PlaneTypeConfig({rows: 40, columns: 10}); // Boeing 777-200
+        planeTypeConfigs["A320"] = PlaneTypeConfig({rows: 30, columns: 6}); // Airbus A320
+        planeTypeConfigs["A332"] = PlaneTypeConfig({rows: 40, columns: 8}); // Airbus A330
+        planeTypeConfigs["B744"] = PlaneTypeConfig({rows: 60, columns: 6}); // Boeing 747-400
+        planeTypeConfigs["E195"] = PlaneTypeConfig({rows: 32, columns: 4}); // Embraer E195
+        planeTypeConfigs["B789"] = PlaneTypeConfig({rows: 30, columns: 9}); // Boeing 787-9
+        planeTypeConfigs["A321"] = PlaneTypeConfig({rows: 30, columns: 6}); // Airbus A321
+    }
 
     // Function to add a new flight
     function addFlight(
@@ -60,20 +90,27 @@ contract Airline {
             "Departure time must be before arrival time"
         );
 
+        // Ensure plane type is valid
+        require(planeTypeConfigs[planeType].rows != 0, "Invalid plane type");
+
         // Generate a new flight ID
         uint256 flightId = flightIdCounter;
         flightIdCounter++;
 
         // Add the flight to the mapping
-        flights[flightId] = Flight({
-            flightNumber: flightNumber,
-            status: FlightStatus.OnTime,
-            origin: origin,
-            destination: destination,
-            departureTime: departureTime,
-            arrivalTime: arrivalTime,
-            planeType: planeType
-        });
+        Flight storage flight = flights[flightId];
+        flight.flightNumber = flightNumber;
+        flight.status = FlightStatus.OnTime;
+        flight.origin = origin;
+        flight.destination = destination;
+        flight.departureTime = departureTime;
+        flight.arrivalTime = arrivalTime;
+        flight.planeType = planeType;
+        flight.owner = msg.sender;
+
+        // Set the seat configuration based on the plane type
+        flight.rows = planeTypeConfigs[planeType].rows;
+        flight.columns = planeTypeConfigs[planeType].columns;
 
         // Add the flight ID to the array
         flightIds.push(flightId);
@@ -101,7 +138,7 @@ contract Airline {
             string memory planeType
         )
     {
-        Flight memory flight = flights[flightId];
+        Flight storage flight = flights[flightId];
         return (
             flightId,
             flight.flightNumber,
@@ -133,11 +170,19 @@ contract Airline {
         // Fetch the flight by ID
         Flight storage flight = flights[flightId];
 
+        require(
+            msg.sender == flight.owner,
+            "Only the owning airline can update the flight"
+        );
+
         // Ensure valid departure and arrival times
         require(
             departureTime < arrivalTime,
             "Departure time must be before arrival time"
         );
+
+        // Ensure the plane type is valid
+        require(planeTypeConfigs[planeType].rows != 0, "Invalid plane type");
 
         // Update the flight details
         flight.flightNumber = flightNumber;
@@ -148,14 +193,133 @@ contract Airline {
         flight.status = status;
         flight.planeType = planeType;
 
+        // Update the seat configuration based on the new plane type
+        flight.rows = planeTypeConfigs[planeType].rows;
+        flight.columns = planeTypeConfigs[planeType].columns;
+
         // Emit an event for the changed flight
         emit FlightChanged(flightId, flightNumber, origin, destination);
+    }
+
+    // Get booked seats - available publically
+    function getSeatAvailability(
+        uint256 flightId
+    ) public view returns (bool[][] memory) {
+        Flight storage flight = flights[flightId];
+
+        bool[][] memory seatAvailability = new bool[][](flight.rows);
+
+        for (uint256 row = 0; row < flight.rows; row++) {
+            seatAvailability[row] = new bool[](flight.columns);
+            for (uint256 column = 0; column < flight.columns; column++) {
+                if (bytes(flight.seatBookings[row][column]).length != 0) {
+                    seatAvailability[row][column] = true; // booked
+                } else {
+                    seatAvailability[row][column] = false; // available
+                }
+            }
+        }
+
+        return seatAvailability;
+    }
+
+    // Get booked seats with passenger names - private
+    function getSeatPassengerNames(
+        uint256 flightId
+    ) public view returns (string[][] memory) {
+        Flight storage flight = flights[flightId];
+
+        require(
+            msg.sender == flight.owner,
+            "Only the owning airline can view passenger names"
+        );
+
+        string[][] memory seatPassengers = new string[][](flight.rows);
+
+        for (uint256 row = 0; row < flight.rows; row++) {
+            seatPassengers[row] = new string[](flight.columns);
+            for (uint256 column = 0; column < flight.columns; column++) {
+                seatPassengers[row][column] = flight.seatBookings[row + 1][
+                    column + 1
+                ];
+            }
+        }
+
+        return seatPassengers;
+    }
+
+    // Book a seat
+    function bookSeat(
+        uint256 flightId,
+        uint256 row,
+        uint256 column,
+        string memory passengerName
+    ) public {
+        Flight storage flight = flights[flightId];
+
+        require(
+            msg.sender == flight.owner,
+            "Only the owning airline can book seats"
+        );
+        require(row >= 0 && row < flight.rows, "Invalid row");
+        require(column >= 0 && column < flight.columns, "Invalid column");
+        require(
+            bytes(flight.seatBookings[row][column]).length == 0,
+            "Seat already booked"
+        );
+
+        flight.seatBookings[row][column] = passengerName;
+
+        emit SeatChanged(
+            flightId,
+            flight.flightNumber,
+            row,
+            column,
+            passengerName
+        );
+    }
+
+    // Function to cancel a seat booking
+    function cancelSeat(
+        uint256 flightId,
+        uint256 row,
+        uint256 column,
+        string memory passengerName
+    ) public {
+        Flight storage flight = flights[flightId];
+
+        require(
+            msg.sender == flight.owner,
+            "Only the owning airline can cancel seat bookings"
+        );
+        require(row >= 0 && row < flight.rows, "Invalid row");
+        require(column >= 0 && column < flight.columns, "Invalid column");
+        require(
+            keccak256(abi.encodePacked(flight.seatBookings[row][column])) ==
+                keccak256(abi.encodePacked(passengerName)),
+            "You do not own this booking"
+        );
+
+        delete flight.seatBookings[row][column];
+
+        emit SeatChanged(
+            flightId,
+            flight.flightNumber,
+            row,
+            column,
+            passengerName
+        );
     }
 
     // Function to delete a flight
     function deleteFlight(uint256 flightId) public {
         // Check if the flight exists
         require(flights[flightId].departureTime != 0, "Flight does not exist");
+
+        require(
+            msg.sender == flights[flightId].owner,
+            "Only the owning airline can delete a flight"
+        );
 
         // Remove the flight from the mapping
         delete flights[flightId];

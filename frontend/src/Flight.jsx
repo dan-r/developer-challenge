@@ -13,6 +13,7 @@ import ErrorIcon from '@mui/icons-material/Error';
 import FlightIcon from '@mui/icons-material/Flight';
 import dayjs from 'dayjs';
 import { flightStatuses } from './includes/const';
+import SeatMap from "./components/SeatMap";
 
 const FlightStatusChip = ({ status }) => {
   let icon, color;
@@ -45,7 +46,7 @@ const FlightStatusChip = ({ status }) => {
   return <Chip icon={icon} label={status} color={color} />;
 };
 
-const Flight = ({ admin }) => {
+const Flight = ({ admin, flightEvent, seatEvent }) => {
   const { id } = useParams(); // Flight id from the URL
   const navigate = useNavigate();
   const [flightData, setFlightData] = useState(null);
@@ -61,6 +62,11 @@ const Flight = ({ admin }) => {
         setLoading(true);
         const response = await axios.get(`/api/flight/${id}`);
         setFlightData(response.data);
+        
+        if (response.data.origin == "") {
+          throw new Error('Flight not found.');
+        }
+
         setFormData({
           flightNumber: response.data.flightNumber,
           origin: response.data.origin,
@@ -71,14 +77,19 @@ const Flight = ({ admin }) => {
           status: response.data.status.toString(),
         });
       } catch (error) {
-        setError('Failed to fetch flight data.');
+        setError('Flight not found');
+
+        // Redirect to homepage after 2s
+        setTimeout(() => {
+          navigate('/');
+          }, 2000);
       } finally {
         setLoading(false);
       }
     };
 
     fetchFlightData();
-  }, [id]);
+  }, [id, flightEvent]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -162,7 +173,7 @@ const Flight = ({ admin }) => {
         Flight Tracking - {flightData.flightNumber}
       </Typography>
 
-      <Card sx={{ maxWidth: 600, mx: 'auto', p: 2 }}>
+      <Card sx={{ maxWidth: 800, mx: 'auto', p: 2 }}>
         <CardContent>
           <Grid container spacing={3}>
             <Grid item xs={12}>
@@ -316,6 +327,7 @@ const Flight = ({ admin }) => {
           </Grid>
         </CardContent>
       </Card>
+      <SeatMap flightId={id} seatEvent={seatEvent} />
     </Box>
   );
 };

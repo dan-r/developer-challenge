@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TextField, Button } from '@mui/material';
-import Grid from '@mui/material/Grid2';
+import Grid from '@mui/material/Grid';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
@@ -17,12 +17,12 @@ import CheckIcon from '@mui/icons-material/Check';
 
 const NewFlight = (props) => {
     const [formValues, setFormValues] = useState({
-        flightNumber: 'EZY1234',
+        flightNumber: 'FFA1234',
         origin: 'LHR',
         destination: 'GRZ',
-        planeType: "B744",
-        departureTime: null,
-        arrivalTime: null,
+        planeType: "E195",
+        departureTime: dayjs(),
+        arrivalTime: dayjs().add(2, 'hour'),
     });
 
     const [isLoading, setIsLoading] = useState(false);
@@ -43,6 +43,7 @@ const NewFlight = (props) => {
     };
 
     const handleSubmit = async (e) => {
+        console.log(formValues);
         e.preventDefault();
 
         const { flightNumber, origin, destination, departureTime, arrivalTime, planeType } = formValues;
@@ -160,6 +161,11 @@ const NewFlight = (props) => {
                                         value={formValues.departureTime}
                                         onChange={(newValue) => handleTimeChange('departureTime', newValue)}
                                         renderInput={(params) => <TextField {...params} fullWidth required />}
+                                        slotProps={{
+                                            textField: {
+                                                required: true,
+                                            },
+                                        }}
                                     />
                                 </LocalizationProvider>
                             </Grid>
@@ -170,6 +176,11 @@ const NewFlight = (props) => {
                                         value={formValues.arrivalTime}
                                         onChange={(newValue) => handleTimeChange('arrivalTime', newValue)}
                                         renderInput={(params) => <TextField {...params} fullWidth required />}
+                                        slotProps={{
+                                            textField: {
+                                                required: true,
+                                            },
+                                        }}
                                     />
                                 </LocalizationProvider>
                             </Grid>

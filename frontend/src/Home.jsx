@@ -33,7 +33,7 @@ function Home(props) {
 
   useEffect(() => {
     refresh();
-  }, [props.event]);
+  }, [props.flightEvent]);
 
   return (
     <>
@@ -41,7 +41,7 @@ function Home(props) {
         <FlightTakeoff /> Welcome to FireFly Air
       </Typography>
       <Divider sx={{ margin: '10px 0' }} />
-      {props.admin ? <p>You are logged in as an Administrator so can create and edit flights.</p> : <></>}
+      {props.admin ? <p>You are logged in as an Administrator so can create and edit flights.</p> : <p>From here you can track flights operated by FireFly Air and our partners.</p>}
 
       {props.admin ? <NewFlight /> : <></>}
       <TableContainer component={Paper}>
