@@ -18,6 +18,8 @@ import theme from './includes/Theme';
 import io from "socket.io-client";
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
+import Typography from '@mui/material/Typography';
+import Divider from '@mui/material/Divider';
 
 function App(props) {
   const [alert, setAlert] = useState({
@@ -92,6 +94,10 @@ function App(props) {
             <Route path="/" element={<Home admin={admin} flightEvent={flightEvent} />} />
             <Route path="/flight/:id" element={<Flight admin={admin} flightEvent={flightEvent} seatEvent={seatEvent} />} />
           </Routes>
+          <Divider sx={{ margin: '20px 0 5px' }} />
+          <Typography color="textSecondary" variant="subtitle1">
+            {`© ${new Date().getFullYear()}`}
+          </Typography>
         </Container>
       </BrowserRouter>
       <Snackbar
