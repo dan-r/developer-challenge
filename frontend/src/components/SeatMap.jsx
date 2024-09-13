@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Card, CardContent, Grid, Typography, Button, Box, Alert } from "@mui/material";
+import 'react-tooltip/dist/react-tooltip.css';
+import { Tooltip } from 'react-tooltip';
 
 // Convert rows and cols to alphanumeric seat (eg. 0-0 = 1A)
 const getSeatLabel = (row, column) => {
@@ -8,8 +10,9 @@ const getSeatLabel = (row, column) => {
     return `${row + 1}${columnLabel}`;
 };
 
-const SeatBooking = ({ flightId, seatEvent }) => {
+const SeatBooking = ({ flightId, seatEvent, admin }) => {
     const [seats, setSeats] = useState([]);
+    const [seatNames, setSeatNames] = useState([]);
     const [loading, setLoading] = useState(true);
     const [alert, setAlert] = useState(null);
 
@@ -19,22 +22,40 @@ const SeatBooking = ({ flightId, seatEvent }) => {
             try {
                 const response = await axios.get(`/api/flight/${flightId}/seats`);
                 setSeats(response.data.output);
-                setLoading(false);
             } catch (error) {
                 console.error("Error fetching seat data", error);
             }
+
+            if (admin) {
+                try {
+                    const response = await axios.get(`/api/flight/${flightId}/seatnames`);
+                    setSeatNames(response.data.output);
+                } catch (error) {
+                    console.error("Error fetching seat data", error);
+                }
+
+            } else {
+                setSeatNames([]);
+            }
+            setLoading(false);
         };
         fetchSeats();
-    }, [flightId, seatEvent]);
+    }, [flightId, seatEvent, admin]);
 
     // Handle clicks
     const handleSeatClick = async (row, column, isBooked) => {
         const seatLabel = getSeatLabel(row, column);
-        const passengerName = window.prompt(
-            isBooked
-                ? `Enter the passenger's name to cancel the booking for seat ${seatLabel}`
-                : `Enter the passenger's name to book seat ${seatLabel}`
-        );
+        var passengerName;
+        if (isBooked && admin) {
+            passengerName = seatNames[row][column];
+        } else {
+            passengerName = window.prompt(
+                isBooked
+                    ? `Enter the passenger's name to cancel the booking for seat ${seatLabel}`
+                    : `Enter the passenger's name to book seat ${seatLabel}`
+            );
+        }
+
 
         if (!passengerName) return;
 
@@ -57,9 +78,9 @@ const SeatBooking = ({ flightId, seatEvent }) => {
         } catch (error) {
             console.error(error);
             if (isBooked) {
-                setAlert({ type: 'error', message: 'Error occured cancelling seat. Please check your name and try again.' });
+                setAlert({ type: 'error', message: 'Error occurred cancelling seat. Please check your name and try again.' });
             } else {
-                setAlert({ type: 'error', message: 'Error occured booking seat.' });
+                setAlert({ type: 'error', message: 'Error occurred booking seat.' });
             }
         }
     };
@@ -112,6 +133,8 @@ const SeatBooking = ({ flightId, seatEvent }) => {
                                             ) : null}
                                             <Grid item>
                                                 <Button
+                                                    data-tooltip-id="tooltip"
+                                                    data-tooltip-content={isBooked && admin && seatNames.length > 0 ? seatNames[rowIndex][columnIndex] : undefined}
                                                     variant="contained"
                                                     color={isBooked ? "secondary" : "primary"}
                                                     onClick={() =>
@@ -130,6 +153,7 @@ const SeatBooking = ({ flightId, seatEvent }) => {
                     </Box>
                 </CardContent>
             </Card>
+            <Tooltip id="tooltip" />
         </>
     );
 };

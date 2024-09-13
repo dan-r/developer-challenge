@@ -63,7 +63,7 @@ const Flight = ({ admin, flightEvent, seatEvent }) => {
         const response = await axios.get(`/api/flight/${id}`);
         setFlightData(response.data);
         
-        if (response.data.origin == "") {
+        if (response.data.origin === "") {
           throw new Error('Flight not found.');
         }
 
@@ -89,7 +89,7 @@ const Flight = ({ admin, flightEvent, seatEvent }) => {
     };
 
     fetchFlightData();
-  }, [id, flightEvent]);
+  }, [id, flightEvent, navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -327,7 +327,7 @@ const Flight = ({ admin, flightEvent, seatEvent }) => {
           </Grid>
         </CardContent>
       </Card>
-      <SeatMap flightId={id} seatEvent={seatEvent} />
+      <SeatMap flightId={id} seatEvent={seatEvent} admin={admin} />
     </Box>
   );
 };

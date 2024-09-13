@@ -239,9 +239,7 @@ contract Airline {
         for (uint256 row = 0; row < flight.rows; row++) {
             seatPassengers[row] = new string[](flight.columns);
             for (uint256 column = 0; column < flight.columns; column++) {
-                seatPassengers[row][column] = flight.seatBookings[row + 1][
-                    column + 1
-                ];
+                seatPassengers[row][column] = flight.seatBookings[row][column];
             }
         }
 
@@ -320,6 +318,9 @@ contract Airline {
             msg.sender == flights[flightId].owner,
             "Only the owning airline can delete a flight"
         );
+
+        // Emit before deleting
+        emit FlightChanged(flightId, flights[flightId].flightNumber, flights[flightId].origin, flights[flightId].destination);
 
         // Remove the flight from the mapping
         delete flights[flightId];

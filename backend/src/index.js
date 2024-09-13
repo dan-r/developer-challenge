@@ -67,6 +67,18 @@ app.get("/api/flight/:id/seats", async (req, res) => {
   );
 });
 
+// Get seat names (admin only)
+app.get("/api/flight/:id/seatnames", async (req, res) => {
+  res.send(
+    await firefly.queryContractAPI(alApiName, "getSeatPassengerNames", {
+      input: {
+        flightId: req.params.id
+      },
+      key: config.SIGNING_KEY,
+    })
+  );
+});
+
 // Book a seat
 app.post("/api/flight/:id/seats", async (req, res) => {
   try {
