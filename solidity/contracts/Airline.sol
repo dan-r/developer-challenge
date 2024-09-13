@@ -259,6 +259,10 @@ contract Airline {
             msg.sender == flight.owner,
             "Only the owning airline can book seats"
         );
+        require(
+            flight.status == FlightStatus.OnTime,
+            "Flight status must be On Time to book seats"
+        );
         require(row >= 0 && row < flight.rows, "Invalid row");
         require(column >= 0 && column < flight.columns, "Invalid column");
         require(
@@ -289,6 +293,10 @@ contract Airline {
         require(
             msg.sender == flight.owner,
             "Only the owning airline can cancel seat bookings"
+        );
+        require(
+            flight.status == FlightStatus.OnTime,
+            "Flight status must be On Time to cancel seats"
         );
         require(row >= 0 && row < flight.rows, "Invalid row");
         require(column >= 0 && column < flight.columns, "Invalid column");
