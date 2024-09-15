@@ -95,7 +95,7 @@ function App(props) {
             <Route path="/flight/:id" element={<Flight admin={admin} flightEvent={flightEvent} seatEvent={seatEvent} />} />
           </Routes>
           <Divider sx={{ margin: '20px 0 5px' }} />
-          <Typography color="textSecondary" variant="subtitle1">
+          <Typography color="textSecondary" variant="subtitle1" sx={{ margin: '0 0 1em' }}>
             {`© ${new Date().getFullYear()}`}
           </Typography>
         </Container>

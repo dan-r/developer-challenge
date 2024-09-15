@@ -1,12 +1,12 @@
 # Developer Challenge
 
-A DApp that tracks flights for an airline and provides a user and administrator interface. All data is held on-chain.
+This project is a DApp to track flights for an airline. It provides both a user and administrator interface, with all data stored on-chain. 
 
 ## Stack
-* React Frontend
-* Express Backend
-* Smart contract written in Solidity
-* Uses Hyperledger FireFly to interact with the blockchain
+* Frontend: React
+* Backend: Express
+* Smart Contract: Solidity
+* Blockchain Interaction: Hyperledger FireFly
 
 ## Operation
 The DApp has the same components as the provided developer-challenge repo so to get it running:

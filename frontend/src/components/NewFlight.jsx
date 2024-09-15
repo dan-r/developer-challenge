@@ -17,12 +17,12 @@ import CheckIcon from '@mui/icons-material/Check';
 
 const NewFlight = (props) => {
     const [formValues, setFormValues] = useState({
-        flightNumber: 'FFA1234',
-        origin: 'LHR',
-        destination: 'GRZ',
-        planeType: "E195",
-        departureTime: dayjs(),
-        arrivalTime: dayjs().add(2, 'hour'),
+        flightNumber: '',
+        origin: '',
+        destination: '',
+        planeType: '',
+        departureTime: null,
+        arrivalTime: null,
     });
 
     const [isLoading, setIsLoading] = useState(false);
@@ -116,7 +116,7 @@ const NewFlight = (props) => {
                                     name="flightNumber"
                                     value={formValues.flightNumber}
                                     onChange={handleChange}
-                                    placeholder="XXX1234"
+                                    placeholder="FFA1234"
                                     fullWidth
                                     required
                                 />
@@ -149,7 +149,7 @@ const NewFlight = (props) => {
                                     name="planeType"
                                     value={formValues.planeType}
                                     onChange={handleChange}
-                                    placeholder="B744"
+                                    placeholder="E195"
                                     fullWidth
                                     required
                                 />

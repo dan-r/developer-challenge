@@ -314,11 +314,7 @@ async function init() {
 }
 
 io.on("connection", (socket) => {
-  console.log("WS: Connect");
-
-  socket.on("disconnect", () => {
-    console.log("WS: Disconnect");
-  });
+  socket.on("disconnect", () => { });
 });
 
 init().catch((err) => {

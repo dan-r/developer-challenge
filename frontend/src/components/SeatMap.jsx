@@ -91,7 +91,7 @@ const SeatBooking = ({ flightId, seatEvent, admin }) => {
 
     return (
         <>
-            <Card variant="outlined" sx={{ maxWidth: 800, width: '100%', mx: 'auto', my: 4, p: 2 }}>
+            <Card variant="outlined" sx={{ maxWidth: 800, width: '100%', mx: 'auto', my: 4, p: 2 }} style={{ marginBottom: 0 }}>
                 <CardContent>
                     <Typography variant="h5" gutterBottom>
                         Seat Map

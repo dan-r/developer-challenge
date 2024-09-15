@@ -72,7 +72,7 @@ function Home(props) {
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
-              {category == "departures" ?
+              {category === "departures" ?
                 <TableCell>Departure Time</TableCell> : <TableCell>Arrival Time</TableCell>}
               <TableCell>Flight Number</TableCell>
               <TableCell>Status</TableCell>
@@ -87,7 +87,7 @@ function Home(props) {
                 key={row.id}
                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
               >
-                {category == "departures" ?
+                {category === "departures" ?
                   <TableCell component="th" scope="row">
                     {new Date(row.departureTime * 1000).toLocaleString()}
                   </TableCell> :
