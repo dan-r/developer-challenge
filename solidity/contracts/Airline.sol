@@ -43,7 +43,7 @@ contract Airline {
 
     mapping(string => PlaneTypeConfig) private planeTypeConfigs;
 
-    // Event that is emitted when a flight is added
+    // Flight change events
     event FlightAdded(
         uint256 flightId,
         string flightNumber,
@@ -56,6 +56,8 @@ contract Airline {
         string origin,
         string destination
     );
+
+    // Seat change event. Seat changes do not trigger FlightChanged
     event SeatChanged(
         uint256 flightId,
         string flightNumber,

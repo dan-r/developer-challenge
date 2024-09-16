@@ -12,7 +12,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import ErrorIcon from '@mui/icons-material/Error';
 import FlightIcon from '@mui/icons-material/Flight';
 import dayjs from 'dayjs';
-import { flightStatuses } from './includes/const';
+import { flightStatuses, planeTypes } from './includes/const';
 import SeatMap from "./components/SeatMap";
 
 const FlightStatusChip = ({ status }) => {
@@ -173,7 +173,7 @@ const Flight = ({ admin, flightEvent, seatEvent }) => {
         Flight Tracking - {flightData.flightNumber}
       </Typography>
 
-      <Card sx={{ maxWidth: 800, mx: 'auto', p: 2 }}>
+      <Card sx={{ maxWidth: 900, mx: 'auto', p: 2 }}>
         <CardContent>
           <Grid container spacing={3}>
             <Grid item xs={12}>
@@ -235,7 +235,7 @@ const Flight = ({ admin, flightEvent, seatEvent }) => {
                 />
               ) : (
                 <Typography variant="body1">
-                  <FlightIcon fontSize="small" /> Plane Type: {flightData.planeType}
+                  <FlightIcon fontSize="small" /> Plane Type: {planeTypes[flightData.planeType]}
                 </Typography>
               )}
             </Grid>
@@ -252,7 +252,7 @@ const Flight = ({ admin, flightEvent, seatEvent }) => {
                 />
               ) : (
                 <Typography variant="body1">
-                  <AccessTimeIcon fontSize="small" /> Departure Time: {dayjs.unix(flightData.departureTime).format('DD MMM YYYY, HH:mm A')}
+                  <AccessTimeIcon fontSize="small" /> Departure Time: {dayjs.unix(flightData.departureTime).format('DD MMM YYYY, HH:mm')}
                 </Typography>
               )}
             </Grid>
@@ -269,7 +269,7 @@ const Flight = ({ admin, flightEvent, seatEvent }) => {
                 />
               ) : (
                 <Typography variant="body1">
-                  <AccessTimeIcon fontSize="small" /> Arrival Time: {dayjs.unix(flightData.arrivalTime).format('DD MMM YYYY, HH:mm A')}
+                  <AccessTimeIcon fontSize="small" /> Arrival Time: {dayjs.unix(flightData.arrivalTime).format('DD MMM YYYY, HH:mm')}
                 </Typography>
               )}
             </Grid>
@@ -293,7 +293,7 @@ const Flight = ({ admin, flightEvent, seatEvent }) => {
                 </TextField>
               ) : (
                 <Typography variant="body1">
-                  Flight Status: <FlightStatusChip status={flightStatuses[flightData.status]} />
+                  Flight Status: &nbsp;<FlightStatusChip status={flightStatuses[flightData.status]} />
                 </Typography>
               )}
             </Grid>

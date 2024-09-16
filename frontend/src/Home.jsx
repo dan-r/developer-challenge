@@ -89,10 +89,10 @@ function Home(props) {
               >
                 {category === "departures" ?
                   <TableCell component="th" scope="row">
-                    {new Date(row.departureTime * 1000).toLocaleString()}
+                    {new Date(row.departureTime * 1000).toLocaleString("en-GB")}
                   </TableCell> :
                   <TableCell component="th" scope="row">
-                    {new Date(row.arrivalTime * 1000).toLocaleString()}
+                    {new Date(row.arrivalTime * 1000).toLocaleString("en-GB")}
                   </TableCell>
                 }
                 <TableCell><Link to={"/flight/" + row.id}>{row.flightNumber}</Link></TableCell>
